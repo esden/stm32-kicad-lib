@@ -1,0 +1,3 @@
+[submodule "stm32cube"]
+	path = stm32cube
+	url = https://github.com/esden/stm32cube-database.git
