@@ -69,7 +69,7 @@ def symbol_pin(f, name, num, x, y, direction, io_type):
     # Not Connected     N
     if io_type:
         if re.match("^I/O$", io_type) or \
-            re.match("^MonoIO$", io_type):
+           re.match("^MonoIO$", io_type):
             pin_type = 'B'
         elif re.match("^I$", io_type) or \
             re.match("^Boot$", io_type) or \
@@ -140,7 +140,7 @@ def symbol_pin_height(banks):
 
 
 def symbol_body_width(pins):
-    max_char_count = 0;
+    max_char_count = 0
 
     for pin in pins:
         name = pin['Pin_name']
@@ -327,7 +327,7 @@ source_dir = "../stm32cube/db/mcu"
 source_filenames = glob.glob(source_dir + "/STM32*.xml")
 
 lib_head(libf)
-sources_count = 0;
+sources_count = 0
 for source_filename in source_filenames:
     symbols_from_file(source_filename, libf)
     sources_count += 1
