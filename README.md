@@ -5,3 +5,5 @@ To regenerate the library, you will need to get the stm32cube database submodule
 git submodule init
 git submodule update
 ```
+
+The generate.sh script does that for you.
