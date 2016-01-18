@@ -9,8 +9,16 @@ import StringIO
 # import os
 import glob
 
-glyph_widths = {' ': 38, '!': 24, '"': 38, '#': 50, '$': 48, '%': 57, '&': 62, '\'': 24, '(': 33, ')': 33, '*': 38, '+': 62, ',': 24, '-': 62, '.': 24, '/': 52, '0': 48, '1': 48, '2': 48, '3': 48, '4': 48, '5': 48, '6': 48, '7': 48, '8': 48, '9': 48, ':': 24, ';': 24, '<': 62, '=': 62, '>': 62, '?': 43, '@': 64, 'A': 43, 'B': 50, 'C': 50, 'D': 50, 'E': 45, 'F': 43, 'G': 50, 'H': 52, 'I': 24, 'J': 38, 'K': 50, 'L': 40, 'M': 57, 'N': 52, 'O': 52, 'P': 50, 'Q': 52, 'R': 50, 'S': 48, 'T': 38, 'U': 52, 'V': 43, 'W': 57, 'X': 48, 'Y': 43, 'Z': 48, '[': 33, '\\': 33, ']': 33, '^': 29, '_': 38, '`': 19, 'a': 45, 'b': 45, 'c': 43, 'd': 45, 'e': 43, 'f': 29, 'g': 45, 'h': 45, 'i': 24, 'j': 24, 'k': 40, 'l': 26, 'm': 67, 'n': 45, 'o': 45, 'p': 45, 'q': 45, 'r': 31, 's': 40, 't': 29, 'u': 45, 'v': 38, 'w': 52, 'x': 40, 'y': 38, 'z': 40, '{': 33, '|': 48, '}': 33, '~': 36}
-
+glyph_widths = {
+    ' ': 38, '!': 24, '"': 38, '#': 50, '$': 48, '%': 57, '&': 62, '\'': 24, '(': 33, ')': 33, '*': 38, '+': 62,
+    ',': 24, '-': 62, '.': 24, '/': 52, '0': 48, '1': 48, '2': 48, '3': 48, '4': 48, '5': 48, '6': 48, '7': 48,
+    '8': 48, '9': 48, ':': 24, ';': 24, '<': 62, '=': 62, '>': 62, '?': 43, '@': 64, 'A': 43, 'B': 50, 'C': 50,
+    'D': 50, 'E': 45, 'F': 43, 'G': 50, 'H': 52, 'I': 24, 'J': 38, 'K': 50, 'L': 40, 'M': 57, 'N': 52, 'O': 52,
+    'P': 50, 'Q': 52, 'R': 50, 'S': 48, 'T': 38, 'U': 52, 'V': 43, 'W': 57, 'X': 48, 'Y': 43, 'Z': 48, '[': 33,
+    '\\': 33, ']': 33, '^': 29, '_': 38, '`': 19, 'a': 45, 'b': 45, 'c': 43, 'd': 45, 'e': 43, 'f': 29, 'g': 45,
+    'h': 45, 'i': 24, 'j': 24, 'k': 40, 'l': 26, 'm': 67, 'n': 45, 'o': 45, 'p': 45, 'q': 45, 'r': 31, 's': 40,
+    't': 29, 'u': 45, 'v': 38, 'w': 52, 'x': 40, 'y': 38, 'z': 40, '{': 33, '|': 48, '}': 33, '~': 36
+}
 
 def pretty_print_banks(banks):
     bank_names = sorted(banks.keys())
@@ -35,11 +43,11 @@ def lib_foot(f):
     print >>f, '#End Library'
 
 
-def symbol_head(f, names, footprint):
+def symbol_head(f, names, footprint, parts=1):
     print >>f, "#"
     print >>f, "# " + names[0]
     print >>f, "#"
-    print >>f, "DEF " + names[0] + " U 0 50 Y Y 1 F N"
+    print >>f, "DEF " + names[0] + " U 0 50 Y Y " + str(parts) + " F N"
     print >>f, "F0 \"U\" 0 100 50 H V C CNN"
     print >>f, "F1 \"" + names[0] + "\" 0 -100 50 H V C CNN"
     print >>f, "F2 \"" + footprint + "\" 0 -200 50 H V C CIN"
@@ -52,11 +60,11 @@ def symbol_head(f, names, footprint):
     print >>f, "DRAW"
 
 
-def symbol_frame(f, startx, starty, endx, endy):
-    print >>f, "S %s %s %s %s 0 1 10 N" % (startx, starty, endx, endy)
+def symbol_frame(f, startx, starty, endx, endy, part=1):
+    print >>f, "S %s %s %s %s %d 1 10 N" % (startx, starty, endx, endy, part)
 
 
-def symbol_pin(f, name, num, x, y, direction, io_type):
+def symbol_pin(f, name, num, x, y, direction, io_type, part=1):
     pin_type = 'B'
     # Pin types are:
     # Input             I
@@ -90,10 +98,10 @@ def symbol_pin(f, name, num, x, y, direction, io_type):
     else:
         print "Pin '%s' io type is empty, defaulting to bidirectional 'B'." % name
 
-    print >>f, "X %s %s %s %s 300 %s 50 50 1 1 %s" % (name, num, x, y, direction, pin_type)
+    print >>f, "X %s %s %s %s 300 %s 50 50 %d 1 %s" % (name, num, x, y, direction, part, pin_type)
 
 
-def symbol_bank(f, pins, x_offset, y_offset, spacing, direction):
+def symbol_bank(f, pins, x_offset, y_offset, spacing, direction, part=1):
     counter = 0
 
     def pin_sort_key(pin_key):
@@ -105,9 +113,9 @@ def symbol_bank(f, pins, x_offset, y_offset, spacing, direction):
         if pin['Pin_functions']:
             name += "/" + '/'.join(pin['Pin_functions'])
         if direction == 'R' or direction == 'L':
-            symbol_pin(f, name, pin['Pin'], x_offset, y_offset - (counter * spacing), direction, pin['Pin_type'])
+            symbol_pin(f, name, pin['Pin'], x_offset, y_offset - (counter * spacing), direction, pin['Pin_type'], part)
         elif direction == 'U' or direction == 'D':
-            symbol_pin(f, name, pin['Pin'], x_offset, y_offset - (counter * spacing), direction, pin['Pin_type'])
+            symbol_pin(f, name, pin['Pin'], x_offset, y_offset - (counter * spacing), direction, pin['Pin_type'], part)
         else:
             print "Unknown direction!!!"
         counter += 1
@@ -141,11 +149,13 @@ def symbol_pin_height(banks):
 
     return full_height * 100
 
+
 def graphical_text_width(text):
     tally = 0
     for char in text:
         tally += glyph_widths[char]
     return tally
+
 
 def symbol_body_width(pins):
     max_graphical_text_width = 0
@@ -164,9 +174,29 @@ def symbol_body_width(pins):
     # We need tou round to the nearest 100mil bound
     width = real_width + (100 - (real_width % 100))
 
-    #print "Width %d" % width
+    # print "Width %d" % width
 
     return width
+
+
+def symbol_bank_width(bank):
+    max_graphical_text_width = 0
+
+    for pin in bank:
+        name = pin['Pin_name']
+        if pin["Pin_functions"]:
+            name += "/" + '/'.join(pin['Pin_functions'])
+        max_graphical_text_width = max(graphical_text_width(name), max_graphical_text_width)
+
+    # With body width we mean including the pins ...
+    pin_with_longest_text_width = max_graphical_text_width + 50 + 300
+
+    real_width = pin_with_longest_text_width + graphical_text_width("  ")
+
+    width = real_width + (100 - (real_width % 100))
+
+    return width
+
 
 def pin_append_combine(pin_list, new_pin):
     # Extract the record with the same Pin number from the pin_list if available
@@ -241,6 +271,10 @@ def lib_symbol(f, source_tree):
                     banks[m.group(1)] = [row]
             else:
                 banks['OTHER'].append(row)
+    
+    #
+    # Plot single symbol
+    #
     # pretty_print_banks(banks)
     symbol_head(f, [source_tree.attrib["RefName"]], source_tree.attrib["Package"])
 
@@ -285,6 +319,42 @@ def lib_symbol(f, source_tree):
 
     symbol_foot(f)
 
+    #
+    # Plot symbol with parts
+    #
+    sym_names = []
+    for ref in [source_tree.attrib["RefName"]]:
+        sym_names.append(ref + "_u")
+
+    symbol_head(f, sym_names, source_tree.attrib["Package"], len(banks))
+
+    sorted_banks = []
+
+    for bank in sorted(banks.keys()):
+        if bank == "VSS" or bank == "VDD":
+            continue
+        sorted_banks.append(banks[bank])
+    sorted_banks.append(banks["VSS"])
+    sorted_banks.append(banks["VDD"])
+
+    part = 1
+    for bank in sorted_banks:
+        height = len(bank) * 100
+        v_offset = height / 2
+        v_offset -= v_offset % 100
+
+        width = symbol_bank_width(bank) + 200
+        h_offset = width / 2
+        h_offset += h_offset % 100
+
+        symbol_frame(f, -h_offset + 300, v_offset + 100, h_offset - 300, v_offset - height - 0, part)
+
+        symbol_bank(f, bank, h_offset, v_offset, 100, 'L', part)
+
+        part += 1
+
+    symbol_foot(f)
+
 
 def symbols_from_file(source_filename, target_file):
     # Open pin definition file
@@ -318,8 +388,8 @@ def symbols_from_file(source_filename, target_file):
     lib_symbol(target_file, source_tree)
 
 
-#width = graphical_text_width("PA7/ADC_IN7/12S1_SD/SPI1_MOSI/TIM14_CH1/TIM17_CH1/TIM1_CH1N/TIM3_CH2")
-#print "Test Text Width: " + str(width) + " double: " + str(width * 2) + "\n"
+# width = graphical_text_width("PA7/ADC_IN7/12S1_SD/SPI1_MOSI/TIM14_CH1/TIM17_CH1/TIM1_CH1N/TIM3_CH2")
+# print "Test Text Width: " + str(width) + " double: " + str(width * 2) + "\n"
 
 
 # Open library file
@@ -338,10 +408,16 @@ source_dir = "../stm32cube/db/mcu"
 source_filenames = glob.glob(source_dir + "/STM32*.xml")
 
 lib_head(libf)
+
 sources_count = 0
-for source_filename in source_filenames:
-    symbols_from_file(source_filename, libf)
+if True:
+    for source_filename in source_filenames:
+        symbols_from_file(source_filename, libf)
+        sources_count += 1
+else:
+    symbols_from_file(source_filenames[0], libf)
     sources_count += 1
+
 lib_foot(libf)
 
 libf.close()
