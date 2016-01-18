@@ -9,6 +9,9 @@ import StringIO
 # import os
 import glob
 
+glyph_widths = {' ': 38, '!': 24, '"': 38, '#': 50, '$': 48, '%': 57, '&': 62, '\'': 24, '(': 33, ')': 33, '*': 38, '+': 62, ',': 24, '-': 62, '.': 24, '/': 52, '0': 48, '1': 48, '2': 48, '3': 48, '4': 48, '5': 48, '6': 48, '7': 48, '8': 48, '9': 48, ':': 24, ';': 24, '<': 62, '=': 62, '>': 62, '?': 43, '@': 64, 'A': 43, 'B': 50, 'C': 50, 'D': 50, 'E': 45, 'F': 43, 'G': 50, 'H': 52, 'I': 24, 'J': 38, 'K': 50, 'L': 40, 'M': 57, 'N': 52, 'O': 52, 'P': 50, 'Q': 52, 'R': 50, 'S': 48, 'T': 38, 'U': 52, 'V': 43, 'W': 57, 'X': 48, 'Y': 43, 'Z': 48, '[': 33, '\\': 33, ']': 33, '^': 29, '_': 38, '`': 19, 'a': 45, 'b': 45, 'c': 43, 'd': 45, 'e': 43, 'f': 29, 'g': 45, 'h': 45, 'i': 24, 'j': 24, 'k': 40, 'l': 26, 'm': 67, 'n': 45, 'o': 45, 'p': 45, 'q': 45, 'r': 31, 's': 40, 't': 29, 'u': 45, 'v': 38, 'w': 52, 'x': 40, 'y': 38, 'z': 40, '{': 33, '|': 48, '}': 33, '~': 36}
+
+
 def pretty_print_banks(banks):
     bank_names = sorted(banks.keys())
     for bank in bank_names:
@@ -138,20 +141,25 @@ def symbol_pin_height(banks):
 
     return full_height * 100
 
+def graphical_text_width(text):
+    tally = 0
+    for char in text:
+        tally += glyph_widths[char]
+    return tally
 
 def symbol_body_width(pins):
-    max_char_count = 0
+    max_graphical_text_width = 0
 
     for pin in pins:
         name = pin['Pin_name']
         if pin['Pin_functions']:
             name += "/" + '/'.join(pin['Pin_functions'])
-        max_char_count = max(len(name), max_char_count)
+        max_graphical_text_width = max(graphical_text_width(name), max_graphical_text_width)
 
-    # The Char width is not constant so we can not 100% rely on the char width value. This also means it is as wide as
-    # the widest character making the width usually larger than necessary.
-    char_width = 52
-    real_width = char_width * (max_char_count * 2 + 2)
+    # With body width we mean including the pins ...
+    pin_with_longest_text_width = max_graphical_text_width + 50 + 300
+
+    real_width = pin_with_longest_text_width * 2 + graphical_text_width("  ")
 
     # We need tou round to the nearest 100mil bound
     width = real_width + (100 - (real_width % 100))
@@ -159,7 +167,6 @@ def symbol_body_width(pins):
     #print "Width %d" % width
 
     return width
-
 
 def pin_append_combine(pin_list, new_pin):
     # Extract the record with the same Pin number from the pin_list if available
@@ -309,6 +316,10 @@ def symbols_from_file(source_filename, target_file):
     print "Generating symbols for: " + source_tree.attrib["RefName"]
 
     lib_symbol(target_file, source_tree)
+
+
+#width = graphical_text_width("PA7/ADC_IN7/12S1_SD/SPI1_MOSI/TIM14_CH1/TIM17_CH1/TIM1_CH1N/TIM3_CH2")
+#print "Test Text Width: " + str(width) + " double: " + str(width * 2) + "\n"
 
 
 # Open library file
