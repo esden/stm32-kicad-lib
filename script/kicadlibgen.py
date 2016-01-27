@@ -93,6 +93,8 @@ def symbol_pin(f, name, num, x, y, direction, io_type, part=1):
             pin_type = 'W'
         elif re.match("^NC$", io_type):
             pin_type = 'N'
+        elif re.match("^Passive$", io_type):
+            pin_type = 'P'
         else:
             print "Pin '%s' does not have a valid type '%s' defaulting to bidirectional 'B'." % (name, io_type)
     else:
@@ -284,7 +286,7 @@ def lib_symbol(f, source_tree):
         banks['VSS'].append({'Pin': str((int(m.group(1)) + 1)),
                              'Pin_name': "Pad",
                              'Pin_functions': [],
-                             'Pin_type': "NC" if source_tree.attrib["HasPowerPad"]=="false" else "Power"})
+                             'Pin_type': "Passive" if source_tree.attrib["HasPowerPad"]=="false" else "Power"})
 
     height = symbol_pin_height(banks)
     v_offset = height / 2
