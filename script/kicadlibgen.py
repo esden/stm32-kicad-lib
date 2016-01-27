@@ -278,6 +278,14 @@ def lib_symbol(f, source_tree):
     # pretty_print_banks(banks)
     symbol_head(f, [source_tree.attrib["RefName"]], source_tree.attrib["Package"])
 
+    # Add pad pin to symbol if the package is a QFN type
+    m = re.match(".*QFPN(\d*)", source_tree.attrib["Package"])
+    if m:
+        banks['VSS'].append({'Pin': str((int(m.group(1)) + 1)),
+                             'Pin_name': "Pad",
+                             'Pin_functions': [],
+                             'Pin_type': "NC" if source_tree.attrib["HasPowerPad"]=="false" else "Power"})
+
     height = symbol_pin_height(banks)
     v_offset = height / 2
     v_offset -= v_offset % 100
@@ -405,7 +413,7 @@ except:
     exit(1)
 
 source_dir = "../stm32cube/db/mcu"
-source_filenames = glob.glob(source_dir + "/STM32*.xml")
+source_filenames = sorted(glob.glob(source_dir + "/STM32*.xml"))
 
 lib_head(libf)
 
