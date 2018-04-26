@@ -5,6 +5,7 @@ __author__ = 'esdentem'
 
 import xml.etree.ElementTree
 import re
+import sys
 import StringIO
 # import os
 import glob
@@ -247,10 +248,11 @@ def lib_symbol(f, source_tree):
         pin_name = pin_data.attrib["Name"].replace(" ", "")
         pin_type = pin_data.attrib["Type"]
         pin_functions = []
-        for pin_function in pin_data.findall("Signal"):
-            pf_name = pin_function.attrib["Name"]
-            if pf_name != None and pf_name != "GPIO":
-                pin_functions.append(pf_name)
+        if not '--short-pins' in sys.argv:
+            for pin_function in pin_data.findall("Signal"):
+                pf_name = pin_function.attrib["Name"]
+                if pf_name != None and pf_name != "GPIO":
+                    pin_functions.append(pf_name)
         pin_append_combine(data, {'Pin': pin,
                                   'Pin_name': pin_name,
                                   'Pin_functions': pin_functions,
