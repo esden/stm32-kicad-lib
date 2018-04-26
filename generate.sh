@@ -4,5 +4,5 @@ git submodule init
 git submodule update
 
 cd script
-./kicadlibgen.py
+./kicadlibgen.py $@
 cd -
