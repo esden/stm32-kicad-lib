@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """Kicad library file generator for the stm32cube database files."""
 
 __author__ = 'esdentem'
@@ -6,8 +6,6 @@ __author__ = 'esdentem'
 import xml.etree.ElementTree
 import re
 import sys
-import StringIO
-# import os
 import glob
 
 glyph_widths = {
@@ -24,45 +22,45 @@ glyph_widths = {
 def pretty_print_banks(banks):
     bank_names = sorted(banks.keys())
     for bank in bank_names:
-        print "Bank: %s" % bank
-        print "\tPin\tName\tType\tStruct\tFunc"
+        print("Bank: %s" % bank)
+        print("\tPin\tName\tType\tStruct\tFunc")
         for pin in banks[bank]:
-            print "\t%s\t%s\t%s\t%s\t%s" % (pin['Pin'],
+            print("\t%s\t%s\t%s\t%s\t%s" % (pin['Pin'],
                                             pin['Pin_name'],
                                             pin['Pin_type'],
                                             pin['Pin_structure'],
-                                            pin['Pin_functions'])
+                                            pin['Pin_functions']))
 
 
 def lib_head(f):
-    print >>f, 'EESchema-Library Version 2.3\n'
-    print >>f, '#encoding utf-8'
+    f.write('EESchema-Library Version 2.3\n\n')
+    f.write('#encoding utf-8\n')
 
 
 def lib_foot(f):
-    print >>f, '#'
-    print >>f, '#End Library'
+    f.write('#\n')
+    f.write('#End Library\n')
 
 
 def symbol_head(f, names, footprint, parts=1):
-    print >>f, "#"
-    print >>f, "# " + names[0]
-    print >>f, "#"
-    print >>f, "DEF " + names[0] + " U 0 50 Y Y " + str(parts) + " F N"
-    print >>f, "F0 \"U\" 0 100 50 H V C CNN"
-    print >>f, "F1 \"" + names[0] + "\" 0 -100 50 H V C CNN"
-    print >>f, "F2 \"" + footprint + "\" 0 -200 50 H V C CIN"
-    print >>f, "F3 \"\" 0 0 50 H V C CNN"
+    f.write("#\n")
+    f.write("# " + names[0] + "\n")
+    f.write("#\n")
+    f.write("DEF " + names[0] + " U 0 50 Y Y " + str(parts) + " F N\n")
+    f.write("F0 \"U\" 0 100 50 H V C CNN\n")
+    f.write("F1 \"" + names[0] + "\" 0 -100 50 H V C CNN\n")
+    f.write("F2 \"" + footprint + "\" 0 -200 50 H V C CIN\n")
+    f.write("F3 \"\" 0 0 50 H V C CNN\n")
     if len(names) > 1:
-        print >>f, "ALIAS",
+        f.write("ALIAS")
         for name in names[1:]:
             f.write(" " + name)
-        print >>f, "\n",
-    print >>f, "DRAW"
+        f.write("\n")
+    f.write("DRAW\n")
 
 
 def symbol_frame(f, startx, starty, endx, endy, part=1):
-    print >>f, "S %s %s %s %s %d 1 10 N" % (startx, starty, endx, endy, part)
+    f.write("S {:g} {:g} {:g} {:g} {:g} 1 10 N\n".format(startx, starty, endx, endy, part))
 
 
 def symbol_pin(f, name, num, x, y, direction, io_type, part=1):
@@ -97,11 +95,11 @@ def symbol_pin(f, name, num, x, y, direction, io_type, part=1):
         elif re.match("^Passive$", io_type):
             pin_type = 'P'
         else:
-            print "Pin '%s' does not have a valid type '%s' defaulting to bidirectional 'B'." % (name, io_type)
+            print("Pin '%s' does not have a valid type '%s' defaulting to bidirectional 'B'." % (name, io_type))
     else:
-        print "Pin '%s' io type is empty, defaulting to bidirectional 'B'." % name
+        print("Pin '%s' io type is empty, defaulting to bidirectional 'B'." % name)
 
-    print >>f, "X %s %s %s %s 300 %s 50 50 %d 1 %s" % (name, num, x, y, direction, part, pin_type)
+    f.write("X {} {} {:g} {:g} 300 {} 50 50 {:g} 1 {}\n".format(name, num, x, y, direction, part, pin_type))
 
 
 def symbol_bank(f, pins, x_offset, y_offset, spacing, direction, part=1):
@@ -120,13 +118,13 @@ def symbol_bank(f, pins, x_offset, y_offset, spacing, direction, part=1):
         elif direction == 'U' or direction == 'D':
             symbol_pin(f, name, pin['Pin'], x_offset, y_offset - (counter * spacing), direction, pin['Pin_type'], part)
         else:
-            print "Unknown direction!!!"
+            print("Unknown direction!!!")
         counter += 1
 
 
 def symbol_foot(f):
-    print >>f, "ENDDRAW"
-    print >>f, "ENDDEF"
+    f.write("ENDDRAW\n")
+    f.write("ENDDEF\n")
 
 
 def symbol_pin_height(banks):
@@ -228,13 +226,13 @@ def pin_append_combine(pin_list, new_pin):
             pin["Pin_type"] = "I/O"
         pin_list[pin_index] = pin
         # Report the merging action
-        print "Merge " + "\tpin\t", pin['Pin'], \
+        print("Merge " + "\tpin\t", pin['Pin'], \
             "\tName:", pin['Pin_name'], \
             "\tType:", old_t, "+", new_t, "=", pin['Pin_type'], \
-            "\tFunc:", old_functions, "+", new_pin['Pin_functions'],
+            "\tFunc:", old_functions, "+", new_pin['Pin_functions'])
         if pin['Pin_name'] != new_pin['Pin_name']:
-            print "+", new_pin['Pin_name'],
-        print "=", pin['Pin_functions']
+            print("+", new_pin['Pin_name'])
+        print("=", pin['Pin_functions'])
     else:
         pin_list.append(new_pin)
 
@@ -275,7 +273,7 @@ def lib_symbol(f, source_tree):
                     banks[m.group(1)] = [row]
             else:
                 banks['OTHER'].append(row)
-    
+
     #
     # Plot single symbol
     #
@@ -370,7 +368,7 @@ def lib_symbol(f, source_tree):
 
 def symbols_from_file(source_filename, target_file):
     # Open pin definition file
-    print "Loading source file: " + source_filename
+    print("Loading source file: " + source_filename)
 
     source_data = None
     # Try to load the source file
@@ -379,8 +377,8 @@ def symbols_from_file(source_filename, target_file):
             source_data = f.read()
             f.close()
     except:
-        print "failed to open source file"
-        print "Exitinig!"
+        print("failed to open source file")
+        print("Exitinig!")
         exit(1)
 
     # Remove xmlns (xml namespace)
@@ -391,11 +389,11 @@ def symbols_from_file(source_filename, target_file):
     try:
         source_tree = xml.etree.ElementTree.fromstring(source_data)
     except:
-        print "source file parsing failed"
-        print "Exiting!"
+        print("source file parsing failed")
+        print("Exiting!")
         exit(1)
 
-    print "Generating symbols for: " + source_tree.attrib["RefName"]
+    print("Generating symbols for: " + source_tree.attrib["RefName"])
 
     lib_symbol(target_file, source_tree)
 
@@ -407,13 +405,13 @@ def symbols_from_file(source_filename, target_file):
 # Open library file
 lib_filename = "../stm32.lib"
 
-print "Opening '" + lib_filename + "' as our target library file"
+print("Opening '" + lib_filename + "' as our target library file")
 
 try:
     libf = open(lib_filename, 'w')
 except:
-    print "could not open target library file"
-    print "Exiting!"
+    print("could not open target library file")
+    print("Exiting!")
     exit(1)
 
 source_dir = "../stm32cube/db/mcu"
@@ -434,5 +432,5 @@ lib_foot(libf)
 
 libf.close()
 
-print "Generated %d STM32 symbols." % sources_count
+print("Generated %d STM32 symbols." % sources_count)
 
