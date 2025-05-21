@@ -25,13 +25,9 @@ def pretty_print_banks(banks):
     bank_names = sorted(banks.keys())
     for bank in bank_names:
         print("Bank: %s" % bank)
-        print("\tPin\tName\tType\tStruct\tFunc")
+        print("\tPin\tName\tType\tFunc")
         for pin in banks[bank]:
-            print("\t%s\t%s\t%s\t%s\t%s" % (pin['Pin'],
-                                            pin['Pin_name'],
-                                            pin['Pin_type'],
-                                            pin['Pin_structure'],
-                                            pin['Pin_functions']))
+            print(f"\t{pin['Pin']}\t{pin['Pin_name']}\t{pin['Pin_type']}\t{pin['Pin_functions']}")
 
 
 def lib_head(f):
@@ -337,11 +333,13 @@ def lib_symbol(f, source_tree, single):
                              'Pin_functions': [],
                              'Pin_type': "Passive" if source_tree.attrib["HasPowerPad"]=="false" else "Power"})
 
+
+    # pretty_print_banks(banks)
+
     #
     # Plot single symbol
     #
     if single:
-        # pretty_print_banks(banks)
         symbol_head(f, [source_tree.attrib["RefName"]], source_tree.attrib["Package"])
         sub_symbol_head(f, [source_tree.attrib["RefName"]])
 
