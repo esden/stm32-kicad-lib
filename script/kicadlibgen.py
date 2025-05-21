@@ -149,6 +149,33 @@ def symbol_pin(f, name, functions, num, x, y, direction, io_type, part=1):
             )
 """)
 
+    if False:
+        max_width = graphical_text_width(pin_name)
+        for func in functions:
+            max_width = max(graphical_text_width(pin_name + "/" + func), max_width)
+        if direction == 0:
+            f.write(f"""\
+            (polyline (pts
+                (xy {(x + 300 + 60) * 0.0254:g} {(y - 0) * 0.0254:g})
+                (xy {(x + 300 + 60) * 0.0254:g} {(y - 50) * 0.0254:g})
+                (xy {(x + 300 + 60 + graphical_text_width(pin_name)) * 0.0254:g} {(y - 50) * 0.0254:g})
+                (xy {(x + 300 + 60 + graphical_text_width(pin_name)) * 0.0254:g} {(y - 0) * 0.0254:g})
+                (xy {(x + 300 + 60 + graphical_text_width(pin_name)) * 0.0254:g} {(y - 50) * 0.0254:g})
+                (xy {(x + 300 + 60 + max_width) * 0.0254:g} {(y - 50) * 0.0254:g})
+                (xy {(x + 300 + 60 + max_width) * 0.0254:g} {(y - 0) * 0.0254:g})))
+""")
+        elif direction == 180:
+            f.write(f"""\
+            (polyline (pts
+                (xy {(x - 300 - 60) * 0.0254:g} {(y - 0) * 0.0254:g})
+                (xy {(x - 300 - 60) * 0.0254:g} {(y - 50) * 0.0254:g})
+                (xy {(x - 300 - 60 - graphical_text_width(pin_name)) * 0.0254:g} {(y - 50) * 0.0254:g})
+                (xy {(x - 300 - 60 - graphical_text_width(pin_name)) * 0.0254:g} {(y - 0) * 0.0254:g})
+                (xy {(x - 300 - 60 - graphical_text_width(pin_name)) * 0.0254:g} {(y - 50) * 0.0254:g})
+                (xy {(x - 300 - 60 - max_width) * 0.0254:g} {(y - 50) * 0.0254:g})
+                (xy {(x - 300 - 60 - max_width) * 0.0254:g} {(y - 0) * 0.0254:g})))
+""")
+
 def symbol_bank_text(f, x, y, name):
     f.write(f"""\
 			(text "Bank: {name}" (at {x*0.0254:g} {y*0.0254:g} 0))
