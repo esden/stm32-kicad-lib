@@ -486,7 +486,11 @@ def generate_library(library_name, source_filenames, single):
             symbols_from_file(source_filename, libf, single)
             sources_count += 1
     else:
-        symbols_from_file(source_filenames[0], libf)
+        p = re.compile(".*STM32L4P5C.*E.*U.*")
+        filenames = [ f for f in source_filenames if p.match(f) ]
+        print(f"matched list {library_name} {filenames}")
+        for filename in filenames:
+            symbols_from_file(filename, libf, single)
         sources_count += 1
 
     lib_foot(libf)
