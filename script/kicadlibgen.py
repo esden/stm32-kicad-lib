@@ -505,7 +505,7 @@ source_filename_groups = {}
 
 for file in source_filenames:
     m = re.match(".*/(STM32.).*.xml$", file)
-    print("m {} {}".format(m, m.group(1)))
+    # print("m {} {}".format(m, m.group(1)))
     if m.group(1) not in source_filename_groups.keys():
         source_filename_groups[m.group(1)] = [file]
     else:
